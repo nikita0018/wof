@@ -1,4 +1,6 @@
-var app = new PIXI.Application({
+var PIXI = require('pixi.js')
+
+var app = new PIXI.autoDetectRenderer({
     autoDensity: true,
     resolution: devicePixelRatio,
     antialias: true
@@ -40,27 +42,27 @@ loader.load(function (loader, resources) {
     var bottom = new PIXI.Sprite(resources.bottom.texture);
 
     // configure bottom
-    bottom.anchor.set(0.5, 0.5);
+    bottom.anchor.set(0.5);
     bottom.position.set(stage.width / 2, stage.height / 1.5);
     stage.addChild(bottom);
 
     // create external circle
     var externalCircle = new PIXI.Sprite(resources.externalCircle.texture);
     // configure external circle
-    externalCircle.anchor.set(0.5, 0.5);
+    externalCircle.anchor.set(0.5);
     externalCircle.position.set(0, -200);
     bottom.addChild(externalCircle);
 
     // create internal circle
     var internalCircle = new PIXI.Sprite(resources.internalCircle.texture);
     // configure internal circle
-    internalCircle.anchor.set(0.5, 0.5);
+    internalCircle.anchor.set(0.5);
     externalCircle.addChild(internalCircle);
 
     // create internal circle
     var spinner = new PIXI.Sprite(resources.spinner.texture);
     // configure internal circle
-    spinner.anchor.set(0.5, 0.5);
+    spinner.anchor.set(0.5);
     spinner.position.set(0, -360);
     bottom.addChild(spinner);
 
@@ -69,6 +71,7 @@ loader.load(function (loader, resources) {
     // configure black rectangle
     rect.beginFill(0x00000);
     rect.drawRect(0, stage.height - 100, stage.width, 100);
+    rect.interactive = true;
     stage.addChild(rect);
 
     // create bet buttons
@@ -87,53 +90,51 @@ loader.load(function (loader, resources) {
         }
     ]
 
+    // configure info text
+    var balanceScore = new PIXI.Text('Balance: ' + balance, textStyles);
+    balanceScore.anchor.set(0.5);
+    balanceScore.position.set(stage.width / 2 - 230, stage.height - 35);
+    rect.addChild(balanceScore);
+    var betScore = new PIXI.Text('Bet: ' + bet, textStyles);
+    betScore.anchor.set(0.5);
+    betScore.position.set(stage.width / 2, stage.height - 35);
+    rect.addChild(betScore);
+    var winScore = new PIXI.Text('Win: ' + win, textStyles);
+    winScore.anchor.set(0.5);
+    winScore.position.set(stage.width / 2 + 230, stage.height - 35);
+    rect.addChild(winScore);
+
     // configure bet buttons
     betButtons.forEach(function (button, i) {
-        button.sprite.anchor.set(0.5, 0.5);
+        button.sprite.anchor.set(0.5);
         button.sprite.position.set(stage.width / 2 + ((i - 1) * 100), stage.height - 100);
         rect.addChild(button.sprite);
-        var innerText = new PIXI.Text(button.bet)
-        innerText.anchor.set(0.5, 0.5);
-        button.sprite.addChild(innerText)
+        var innerText = new PIXI.Text(button.bet);
+        innerText.anchor.set(0.5);
+        button.sprite.interactive = true;
+        button.sprite.buttonMode = true;
+        button.sprite.on('pointerdown', function(){
+            balance -= button.bet
+            bet = button.bet
+            externalCircle.rotation -= 0.15;
+            balanceScore.text = 'Balance: ' + balance
+            betScore.text = 'Bet: ' + bet
+        })
+        button.sprite.addChild(innerText);
     })
 
     // configure bet buttons
+    var angle = 15
     var wheelMeta = shuffle(WHEEL).map(function (item, i) {
         var innerText = new PIXI.Text(item)
-        innerText.anchor.set(0.5, 0.5);
+        var coordinates = getCoordinateByAngle(externalCircle.height / 2 - 40, angle)
+        angle += 30
+        innerText.anchor.set(0.5);
+        innerText.position.set(coordinates[0], coordinates[1])
         innerText.rotation = 0.2 + 0.53 * i;
         externalCircle.addChild(innerText)
         return innerText
     })
-
-    wheelMeta[0].position.set(25, -105);
-    wheelMeta[1].position.set(74, -74);
-    wheelMeta[2].position.set(105, -25);
-    wheelMeta[3].position.set(105, 25);
-    wheelMeta[4].position.set(74, 74);
-    wheelMeta[5].position.set(25, 105);
-    wheelMeta[6].position.set(-25, 105);
-    wheelMeta[7].position.set(-74, 74);
-    wheelMeta[8].position.set(-105, 25);
-    wheelMeta[9].position.set(-105, -25);
-    wheelMeta[10].position.set(-74, -74);
-    wheelMeta[11].position.set(-25, -105);
-
-
-    // configure info text
-    var balanceScore = new PIXI.Text('Balance: ' + balance, textStyles);
-    balanceScore.anchor.set(0.5, 0.5);
-    balanceScore.position.set(stage.width / 2 - 230, stage.height - 35);
-    rect.addChild(balanceScore);
-    var betScore = new PIXI.Text('Bet: ' + bet, textStyles);
-    betScore.anchor.set(0.5, 0.5);
-    betScore.position.set(stage.width / 2, stage.height - 35);
-    rect.addChild(betScore);
-    var winScore = new PIXI.Text('Win: ' + win, textStyles);
-    winScore.anchor.set(0.5, 0.5);
-    winScore.position.set(stage.width / 2 + 230, stage.height - 35);
-    rect.addChild(winScore);
-
     animationLoop(externalCircle)
 })
 
@@ -141,8 +142,8 @@ loader.load(function (loader, resources) {
 function animationLoop(obj) {
     requestAnimationFrame(animationLoop);
 
-    obj.rotation += 0.01;
-    app.renderer.render(stage);
+    obj.rotation += 0.05;
+    app.render(stage);
 }
 
 function shuffle(array) {
@@ -157,4 +158,9 @@ function shuffle(array) {
     }
 
     return array;
+}
+
+function getCoordinateByAngle(distance, angle) {
+    var angleInRadian = angle * Math.PI / 180
+    return [distance * Math.sin(angleInRadian), -(distance * Math.cos(angleInRadian))]
 }
