@@ -24,5 +24,12 @@ module.exports = {
     getCoordinateByAngle: function (distance, angle) {
         var angleInRadian = angle * Math.PI / 180
         return [distance * Math.sin(angleInRadian), -(distance * Math.cos(angleInRadian))]
+    },
+    /**
+     * Returns random index for an array.
+     * @param {array} arr - distance to the coordinate.
+     */
+    getRandomIndex: function (arr) {
+        return Math.floor(Math.random() * arr.length)
     }
 }
