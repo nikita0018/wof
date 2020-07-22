@@ -121,6 +121,72 @@ function resetScores() {
     win = config.win;
 }
 
+function betButtonHandler(loader, buttonScore) {
+    loader.stage.children.forEach(function (el) {
+        el.interactive = false;
+    })
+    var wheelKeys = Object.keys(wheelMeta);
+    var rotation = wheelKeys[utils.getRandomIndex(wheelKeys)];
+    balance -= buttonScore;
+    bet = buttonScore;
+    var isWin = wheelMeta[rotation] === bet;
+    loader.spriteStorage.balanceScore.updateInnerText('Balance: ' + balance);
+    loader.spriteStorage.betScore.updateInnerText('Bet: ' + bet);
+    rotationRatio += 360 * config.rollsBeforeStop;
+    TweenMax.to(loader.spriteStorage.externalCircle, config.animationDuration, {
+        pixi: {rotation: (rotationRatio + +rotation) + '_ccw'},
+        onComplete: function () {
+            balance < 5 && setTimeout(function () {
+                loader.stage.addChild(loader.spriteStorage.finishScreen);
+            }, 500)
+            loader.stage.children.forEach(function (el) {
+                el.interactive = true;
+            })
+            if (!isWin) return;
+            win += bet * utils.getWinRatio(bet);
+            loader.spriteStorage.winScore.updateInnerText('Win: ' + win);
+        }
+    });
+}
+
+function initBetButton(loader, resources, buttonScore, iterator) {
+    var handleButtonClick = function () {
+        betButtonHandler(loader, buttonScore)
+    }
+    var buttonText = {
+        text: buttonScore,
+        styles: {
+            fill: '#ffffff',
+            strokeThickness: 1,
+            fontWeight: "bold"
+        }
+    }
+    var width = loader.stage.width / 2 + ((iterator - 1) * 100);
+    var height = loader.stage.height - 100;
+
+    new Button(
+        resources.yellowCircle.texture,
+        buttonText,
+        loader.stage,
+        width,
+        height,
+        handleButtonClick
+    );
+
+}
+
+function initBetButtons(loader, resources) {
+    config.bets.forEach(function (buttonScore, i) {
+        initBetButton(loader, resources, buttonScore, i);
+    });
+}
+
+function bindToTicker(loader) {
+    ticker.add(function () {
+        app.render(loader.stage);
+    });
+}
+
 var app = initGameContainer();
 
 var ticker = PIXI.Ticker.shared;
@@ -153,63 +219,6 @@ loader
     .load(initBetScore)
     .load(initWinScore)
     .load(initFinishScreen)
-    .load(initWheelNumbers);
-
-loader.load(function (loader, resources) {
-
-
-    // configure bet buttons
-    config.bets.forEach(function (buttonScore, i) {
-        var handleButtonClick = function () {
-            loader.stage.children.forEach(function (el) {
-                el.interactive = false;
-            })
-            var wheelKeys = Object.keys(wheelMeta);
-            var rotation = wheelKeys[utils.getRandomIndex(wheelKeys)];
-            balance -= buttonScore;
-            bet = buttonScore;
-            var isWin = wheelMeta[rotation] === bet;
-            console.log(buttonScore);
-            loader.spriteStorage.balanceScore.updateInnerText('Balance: ' + balance);
-            loader.spriteStorage.betScore.updateInnerText('Bet: ' + bet);
-            rotationRatio += 360 * config.rollsBeforeStop;
-            TweenMax.to(loader.spriteStorage.externalCircle, config.animationDuration, {
-                pixi: {rotation: (rotationRatio + +rotation) + '_ccw'},
-                onComplete: function () {
-                    balance < 5 && setTimeout(function () {
-                        loader.stage.addChild(loader.spriteStorage.finishScreen);
-                    }, 500)
-                    loader.stage.children.forEach(function (el) {
-                        el.interactive = true;
-                    })
-                    if (!isWin) return;
-                    win += bet * utils.getWinRatio(bet);
-                    loader.spriteStorage.winScore.updateInnerText('Win: ' + win);
-                }
-            });
-        }
-
-        var buttonText = {
-            text: buttonScore,
-            styles: {
-                fill: '#ffffff',
-                strokeThickness: 1,
-                fontWeight: "bold"
-            }
-        }
-
-        new Button(
-            resources.yellowCircle.texture,
-            buttonText,
-            loader.stage,
-            loader.stage.width / 2 + ((i - 1) * 100),
-            loader.stage.height - 100,
-            handleButtonClick
-        );
-    });
-
-    ticker.add(function () {
-        app.render(loader.stage);
-    });
-
-});
+    .load(initWheelNumbers)
+    .load(initBetButtons)
+    .load(bindToTicker);
