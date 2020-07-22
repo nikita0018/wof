@@ -1,5 +1,5 @@
 module.exports = {
-    balance: 200,
+    balance: 5,
     bet: 5,
     win: 0,
     wheelMeta: {},
