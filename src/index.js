@@ -49,7 +49,7 @@ loader
     .add('bg', 'assets/background.jpg')
     .add('bottom', 'assets/bottom.png')
     .add('externalCircle', 'assets/external_circle.png')
-    .add('internalCircle', 'assets/internal_Circle.png')
+    .add('internalCircle', 'assets/internal_circle.png')
     .add('yellowCircle', 'assets/round-yellow.png')
     .add('spinner', 'assets/spinner.png');
 
