@@ -8,6 +8,7 @@ var Scene = require('./modules/Scene');
 var BasicText = require('./modules/BasicText');
 var Button = require('./modules/Button');
 var FinishScreen = require('./modules/FinishScreen');
+var styles = require('./styles');
 var utils = require('./utils');
 
 function initGameContainer() {
@@ -68,19 +69,19 @@ function initSpinner(loader, resources) {
 function initBalanceScore(loader) {
     var width = loader.stage.width / 2 - 230;
     var height = loader.stage.height - 35;
-    loader.spriteStorage.balanceScore = new BasicText('Balance: ' + balance, textStyles, loader.stage, true, width, height);
+    loader.spriteStorage.balanceScore = new BasicText('Balance: ' + balance, styles.score, loader.stage, true, width, height);
 }
 
 function initBetScore(loader) {
     var width = loader.stage.width / 2 + 80;
     var height = loader.stage.height - 35;
-    loader.spriteStorage.betScore = new BasicText('Bet: ' + bet, textStyles, loader.stage, true, width, height);
+    loader.spriteStorage.betScore = new BasicText('Bet: ' + bet, styles.score, loader.stage, true, width, height);
 }
 
 function initWinScore(loader) {
     var width = loader.stage.width / 2 + 230;
     var height = loader.stage.height - 35;
-    loader.spriteStorage.winScore = new BasicText('Win: ' + win, textStyles, loader.stage, true, width, height);
+    loader.spriteStorage.winScore = new BasicText('Win: ' + win, styles.score, loader.stage, true, width, height);
 }
 
 function initFinishScreen(loader) {
@@ -155,12 +156,9 @@ function initBetButton(loader, resources, buttonScore, iterator) {
     }
     var buttonText = {
         text: buttonScore,
-        styles: {
-            fill: '#ffffff',
-            strokeThickness: 1,
-            fontWeight: "bold"
-        }
+        styles: styles.betButton
     }
+
     var width = loader.stage.width / 2 + ((iterator - 1) * 100);
     var height = loader.stage.height - 100;
 
@@ -199,12 +197,6 @@ var win = config.win;
 var rotationRatio = config.rotationRatio;
 var wheelMeta = config.wheelMeta;
 var startingAngle = config.startingAngle;
-
-var textStyles = {
-    fontSize: 28,
-    fill: '#ffffff',
-    fontWeight: 'bold'
-};
 
 loader
     .load(initStage)
