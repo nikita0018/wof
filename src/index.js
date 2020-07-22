@@ -23,11 +23,108 @@ function initGameContainer() {
     return app;
 }
 
-var app = initGameContainer()
+function bindAssets(loader) {
+    loader
+        .add('bg', 'assets/background.jpg')
+        .add('bottom', 'assets/bottom.png')
+        .add('externalCircle', 'assets/external_circle.png')
+        .add('internalCircle', 'assets/internal_circle.png')
+        .add('yellowCircle', 'assets/round-yellow.png')
+        .add('spinner', 'assets/spinner.png');
+}
+
+function initStage() {
+    loader.stage = new PIXI.Container();
+}
+
+function initScene(loader, resources) {
+    new Scene(loader.stage, resources.bg.texture);
+}
+
+function initBottom(loader, resources) {
+    var width = loader.stage.width / 2;
+    var height = loader.stage.height / 1.5;
+    loader.spriteStorage.bottom = new BasicSprite(resources.bottom.texture, loader.stage, true, width, height);
+}
+
+function initExternalCircle(loader, resources) {
+    var width = 0;
+    var height = -200;
+    loader.spriteStorage.externalCircle = new BasicSprite(resources.externalCircle.texture, loader.spriteStorage.bottom, true, width, height);
+}
+
+function initInternalCircle(loader, resources) {
+    var width = 0;
+    var height = -200;
+    loader.spriteStorage.internalCircle = new BasicSprite(resources.internalCircle.texture, loader.spriteStorage.bottom, true, width, height);
+}
+
+function initSpinner(loader, resources) {
+    var width = 0;
+    var height = -loader.spriteStorage.externalCircle.height - 60;
+    loader.spriteStorage.spinner = new BasicSprite(resources.spinner.texture, loader.spriteStorage.bottom, true, width, height);
+}
+
+function initBalanceScore(loader) {
+    var width = loader.stage.width / 2 - 230;
+    var height = loader.stage.height - 35;
+    loader.spriteStorage.balanceScore = new BasicText('Balance: ' + balance, textStyles, loader.stage, true, width, height);
+}
+
+function initBetScore(loader) {
+    var width = loader.stage.width / 2 + 80;
+    var height = loader.stage.height - 35;
+    loader.spriteStorage.betScore = new BasicText('Bet: ' + bet, textStyles, loader.stage, true, width, height);
+}
+
+function initWinScore(loader) {
+    var width = loader.stage.width / 2 + 230;
+    var height = loader.stage.height - 35;
+    loader.spriteStorage.winScore = new BasicText('Win: ' + win, textStyles, loader.stage, true, width, height);
+}
+
+function initFinishScreen(loader) {
+    var actionButton = {
+        message: 'Try again?',
+        onClick: function () {
+            loader.spriteStorage.balanceScore.updateInnerText('Balance: ' + config.balance);
+            loader.spriteStorage.betScore.updateInnerText('Bet: ' + config.bet);
+            loader.spriteStorage.winScore.updateInnerText('Win: ' + config.win);
+            loader.stage.removeChild(loader.spriteStorage.finishScreen);
+            resetScores();
+        }
+    };
+    loader.spriteStorage.finishScreen = new FinishScreen(loader.stage.width, loader.stage.height, actionButton);
+}
+
+function initWheelNumbers(loader) {
+    var defaultShift = 0.2;
+    var radianShift = 0.53;
+    var numbers = utils.shuffle(config.wheelElements);
+
+    numbers.forEach(function (wheelNumber, i) {
+        var coordinates = utils.getCoordinateByAngle(loader.spriteStorage.externalCircle.height / 2 - 40, startingAngle)
+        var innerText = new BasicText(wheelNumber, {}, loader.spriteStorage.externalCircle, true, coordinates[0], coordinates[1]);
+        innerText.rotation = -(defaultShift + radianShift * i);
+        wheelMeta[startingAngle] = wheelNumber;
+        startingAngle += config.elementDistance;
+    });
+}
+
+function initSpriteStorage(loader) {
+    loader.spriteStorage = {};
+}
+
+function resetScores() {
+    balance = config.balance;
+    bet = config.bet;
+    win = config.win;
+}
+
+var app = initGameContainer();
 
 var ticker = PIXI.Ticker.shared;
 
-var stage = new PIXI.Container();
 var loader = PIXI.Loader.shared;
 
 var balance = config.balance;
@@ -35,6 +132,7 @@ var bet = config.balance;
 var win = config.win;
 var rotationRatio = config.rotationRatio;
 var wheelMeta = config.wheelMeta;
+var startingAngle = config.startingAngle;
 
 var textStyles = {
     fontSize: 28,
@@ -43,88 +141,50 @@ var textStyles = {
 };
 
 loader
-    .add('bg', 'assets/background.jpg')
-    .add('bottom', 'assets/bottom.png')
-    .add('externalCircle', 'assets/external_circle.png')
-    .add('internalCircle', 'assets/internal_circle.png')
-    .add('yellowCircle', 'assets/round-yellow.png')
-    .add('spinner', 'assets/spinner.png');
+    .load(initStage)
+    .load(initSpriteStorage)
+    .load(bindAssets)
+    .load(initScene)
+    .load(initBottom)
+    .load(initExternalCircle)
+    .load(initInternalCircle)
+    .load(initSpinner)
+    .load(initBalanceScore)
+    .load(initBetScore)
+    .load(initWinScore)
+    .load(initFinishScreen)
+    .load(initWheelNumbers);
 
 loader.load(function (loader, resources) {
-    new Scene(stage, resources.bg.texture);
 
-    // create bottom
-    var bottom = new BasicSprite(resources.bottom.texture, stage, true, stage.width / 2, stage.height / 1.5);
 
-    // create external circle
-    var externalCircle = new BasicSprite(resources.externalCircle.texture, bottom, true, 0, -200);
-
-    // create internal circle
-    new BasicSprite(resources.internalCircle.texture, bottom, true, 0, -200);
-
-    // create internal circle
-    new BasicSprite(resources.spinner.texture, bottom, true, 0, -externalCircle.height - 60);
-
-    // create finish screen
-    var finishScreen = new FinishScreen(stage.width, stage.height, {
-        message: 'Try again?', onClick: function () {
-            balanceScore.updateInnerText('Balance: ' + config.balance);
-            betScore.updateInnerText('Bet: ' + config.bet);
-            winScore.updateInnerText('Win: ' + config.win);
-            stage.removeChild(finishScreen);
-        }
-    });
-
-    var balanceWidth = stage.width / 2 - 230;
-    var balanceHeight = stage.height - 35;
-    var balanceScore = new BasicText('Balance: ' + balance, textStyles, stage, true, balanceWidth, balanceHeight);
-
-    var barWidth = stage.width / 2 + 80;
-    var barHeight = stage.height - 35;
-    var betScore = new BasicText('Bet: ' + bet, textStyles, stage, true, barWidth, barHeight);
-
-    var winWidth = stage.width / 2 + 230;
-    var winHeight = stage.height - 35;
-    var winScore = new BasicText('Win: ' + win, textStyles, stage, true, winWidth, winHeight);
-
-    var startingAngle = config.startingAngle;
-
-    // configure wheel
-    utils.shuffle(config.wheelElements).forEach(function (item, i) {
-        var coordinates = utils.getCoordinateByAngle(externalCircle.height / 2 - 40, startingAngle)
-        var innerText = new BasicText(item, {}, externalCircle, true, coordinates[0], coordinates[1]);
-        var defaultShift = 0.2;
-        var shiftRadian = 0.53;
-        innerText.rotation = -(defaultShift + shiftRadian * i);
-        wheelMeta[startingAngle] = item;
-        startingAngle += config.elementDistance;
-    });
     // configure bet buttons
     config.bets.forEach(function (buttonScore, i) {
         var handleButtonClick = function () {
-            stage.children.forEach(function (el) {
+            loader.stage.children.forEach(function (el) {
                 el.interactive = false;
             })
             var wheelKeys = Object.keys(wheelMeta);
             var rotation = wheelKeys[utils.getRandomIndex(wheelKeys)];
             balance -= buttonScore;
             bet = buttonScore;
-            var isWin = wheelMeta[rotation] === bet
-            balanceScore.updateInnerText('Balance: ' + balance);
-            betScore.updateInnerText('Bet: ' + bet);
+            var isWin = wheelMeta[rotation] === bet;
+            console.log(buttonScore);
+            loader.spriteStorage.balanceScore.updateInnerText('Balance: ' + balance);
+            loader.spriteStorage.betScore.updateInnerText('Bet: ' + bet);
             rotationRatio += 360 * config.rollsBeforeStop;
-            TweenMax.to(externalCircle, config.animationDuration, {
+            TweenMax.to(loader.spriteStorage.externalCircle, config.animationDuration, {
                 pixi: {rotation: (rotationRatio + +rotation) + '_ccw'},
                 onComplete: function () {
                     balance < 5 && setTimeout(function () {
-                        stage.addChild(finishScreen);
+                        loader.stage.addChild(loader.spriteStorage.finishScreen);
                     }, 500)
-                    stage.children.forEach(function (el) {
+                    loader.stage.children.forEach(function (el) {
                         el.interactive = true;
                     })
                     if (!isWin) return;
                     win += bet * utils.getWinRatio(bet);
-                    winScore.updateInnerText('Win: ' + win);
+                    loader.spriteStorage.winScore.updateInnerText('Win: ' + win);
                 }
             });
         }
@@ -141,15 +201,15 @@ loader.load(function (loader, resources) {
         new Button(
             resources.yellowCircle.texture,
             buttonText,
-            stage,
-            stage.width / 2 + ((i - 1) * 100),
-            stage.height - 100,
+            loader.stage,
+            loader.stage.width / 2 + ((i - 1) * 100),
+            loader.stage.height - 100,
             handleButtonClick
         );
     });
 
     ticker.add(function () {
-        app.render(stage);
+        app.render(loader.stage);
     });
 
 });
