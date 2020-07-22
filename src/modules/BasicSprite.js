@@ -1,4 +1,4 @@
-var PIXI = require('pixi.js')
+var PIXI = require('pixi.js');
 
 /**
  * Represents an Extended Pixi Sprite.
@@ -18,4 +18,4 @@ function BasicSprite(texture, appendTO, centerAnchor, x, y) {
 
 BasicSprite.prototype = Object.create(PIXI.Sprite.prototype);
 
-module.exports = BasicSprite
+module.exports = BasicSprite;

@@ -22,14 +22,31 @@ module.exports = {
      * @param {number} angle - angle to the coordinate relative to y axis.
      */
     getCoordinateByAngle: function (distance, angle) {
-        var angleInRadian = angle * Math.PI / 180
-        return [distance * Math.sin(angleInRadian), -(distance * Math.cos(angleInRadian))]
+        var angleInRadian = angle * Math.PI / 180;
+        return [-(distance * Math.sin(angleInRadian)), -(distance * Math.cos(angleInRadian))];
     },
     /**
      * Returns random index for an array.
-     * @param {array} arr - distance to the coordinate.
+     * @param {array} arr - array to get index from.
      */
     getRandomIndex: function (arr) {
-        return Math.floor(Math.random() * arr.length)
+        return Math.floor(Math.random() * arr.length);
+    },
+    /**
+     * Returns win ratio.
+     * @param {number} num - number to get the ratio.
+     */
+    getWinRatio: function (num) {
+        switch (num) {
+            case 1:
+                return 2;
+            case 3:
+                return 4;
+            case 5:
+                return 6;
+            default:
+                console.error('Invalid value provided');
+                return;
+        }
     }
 }

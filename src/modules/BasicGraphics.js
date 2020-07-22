@@ -1,4 +1,4 @@
-var PIXI = require('pixi.js')
+var PIXI = require('pixi.js');
 
 /**
  * Represents an Extended Pixi Graphics.
@@ -10,13 +10,13 @@ var PIXI = require('pixi.js')
  * @param {number} width - Object's width.
  * @param {number} height - Object's height.
  */
-function BasicSprite(appendTO, color, x, y, width, height) {
+function BasicGraphics(appendTO, color, x, y, width, height) {
     PIXI.Graphics.call(this);
     this.beginFill(color);
     this.drawRect(x, y, width, height);
-    appendTO.addChild(this);
+    appendTO && appendTO.addChild(this);
 }
 
-BasicSprite.prototype = Object.create(PIXI.Graphics.prototype);
+BasicGraphics.prototype = Object.create(PIXI.Graphics.prototype);
 
-module.exports = BasicSprite
+module.exports = BasicGraphics;

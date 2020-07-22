@@ -1,4 +1,4 @@
-var PIXI = require('pixi.js')
+var PIXI = require('pixi.js');
 
 /**
  * Represents an Extended Pixi Text.
@@ -19,11 +19,11 @@ function BasicText(text, style, appendTO, centerAnchor, x, y) {
      * @param {string} text - text to be displayed.
      */
     this.updateInnerText = function (text) {
-        this.text = text
+        this.text = text;
     }
-    appendTO.addChild(this);
+    appendTO && appendTO.addChild(this);
 }
 
 BasicText.prototype = Object.create(PIXI.Text.prototype);
 
-module.exports = BasicText
+module.exports = BasicText;

@@ -17,12 +17,12 @@ function Button(texture, innerText, appendTO, x, y, onCLick) {
     this.position.set(x, y);
     this.buttonMode = true;
     this.interactive = true;
-    this.on('pointerdown', onCLick)
-    text.anchor.set(0.5)
+    this.on('pointerdown', onCLick);
+    text.anchor.set(0.5);
     this.addChild(text);
     appendTO.addChild(this);
 }
 
 Button.prototype = Object.create(PIXI.Sprite.prototype);
 
-module.exports = Button
+module.exports = Button;
