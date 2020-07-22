@@ -4,7 +4,7 @@ var PIXI = require('pixi.js')
  * Represents a Custom Button based on PIXI Text and Sprite.
  * @constructor
  * @param {object} texture - Texture for buttons background.
- * @param {number, string} innerText - Button's text.
+ * @param {object} innerText - Button's text.
  * @param {object} appendTO - Button's parent.
  * @param {number} x - x coordinate relative to parent.
  * @param {number} y - y coordinate relative to parent.
@@ -12,7 +12,7 @@ var PIXI = require('pixi.js')
  */
 function Button(texture, innerText, appendTO, x, y, onCLick) {
     PIXI.Sprite.call(this, texture);
-    var text = new PIXI.Text(innerText);
+    var text = new PIXI.Text(innerText.text, innerText.styles);
     this.anchor.set(0.5);
     this.position.set(x, y);
     this.buttonMode = true;

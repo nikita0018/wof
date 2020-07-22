@@ -1,49 +1,46 @@
 var PIXI = require('pixi.js');
 var gsap = require('gsap').gsap;
+var config = require('./config');
 var TweenMax = require('gsap').TweenMax;
 var PixiPlugin = require('gsap/PixiPlugin').PixiPlugin;
 var BasicSprite = require('./modules/BasicSprite');
-var BasicGraphics = require('./modules/BasicGraphics');
+var Scene = require('./modules/Scene');
 var BasicText = require('./modules/BasicText');
 var Button = require('./modules/Button');
 var FinishScreen = require('./modules/FinishScreen');
 var utils = require('./utils');
 
-var app = new PIXI.autoDetectRenderer({
-    autoDensity: true,
-    antialias: true,
-    resolution: devicePixelRatio
-});
+function initGameContainer() {
+    var app = new PIXI.autoDetectRenderer({
+        autoDensity: true,
+        antialias: true,
+        resolution: devicePixelRatio
+    });
 
-gsap.registerPlugin(PixiPlugin);
-PixiPlugin.registerPIXI(PIXI);
+    gsap.registerPlugin(PixiPlugin);
+    PixiPlugin.registerPIXI(PIXI);
+    document.body.appendChild(app.view);
+    return app;
+}
+
+var app = initGameContainer()
 
 var ticker = PIXI.Ticker.shared;
 
-document.body.appendChild(app.view);
-
 var stage = new PIXI.Container();
-
 var loader = PIXI.Loader.shared;
 
-var balance = 200;
-var bet = 5;
-var win = 0;
-
-var wheelMeta = {};
-var startingAngle = 15;
-var rotationRatio = 0;
+var balance = config.balance;
+var bet = config.balance;
+var win = config.win;
+var rotationRatio = config.rotationRatio;
+var wheelMeta = config.wheelMeta;
 
 var textStyles = {
     fontSize: 28,
     fill: '#ffffff',
     fontWeight: 'bold'
 };
-
-var WHEEL = [1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 5, 5];
-
-// create bet buttons
-var betButtons = [1, 3, 5];
 
 loader
     .add('bg', 'assets/background.jpg')
@@ -54,8 +51,7 @@ loader
     .add('spinner', 'assets/spinner.png');
 
 loader.load(function (loader, resources) {
-    // create BG
-    new BasicSprite(resources.bg.texture, stage);
+    new Scene(stage, resources.bg.texture);
 
     // create bottom
     var bottom = new BasicSprite(resources.bottom.texture, stage, true, stage.width / 2, stage.height / 1.5);
@@ -69,40 +65,45 @@ loader.load(function (loader, resources) {
     // create internal circle
     new BasicSprite(resources.spinner.texture, bottom, true, 0, -externalCircle.height - 60);
 
-    // create black rectangle
-    var rect = new BasicGraphics(stage, 0x00000, 0, stage.height - 100, stage.width, 100);
-
     // create finish screen
     var finishScreen = new FinishScreen(stage.width, stage.height, {
         message: 'Try again?', onClick: function () {
-            balance = 200;
-            bet = 5;
-            win = 0;
-            balanceScore.updateInnerText('Balance: ' + balance);
-            betScore.updateInnerText('Bet: ' + bet);
-            winScore.updateInnerText('Win: ' + win);
+            balanceScore.updateInnerText('Balance: ' + config.balance);
+            betScore.updateInnerText('Bet: ' + config.bet);
+            winScore.updateInnerText('Win: ' + config.win);
             stage.removeChild(finishScreen);
         }
     });
 
-    var balanceScore = new BasicText('Balance: ' + balance, textStyles, stage, true, stage.width / 2 - 230, stage.height - 35);
-    var betScore = new BasicText('Bet: ' + bet, textStyles, stage, true, stage.width / 2, stage.height - 35);
-    var winScore = new BasicText('Win: ' + win, textStyles, stage, true, stage.width / 2 + 230, stage.height - 35);
+    var balanceWidth = stage.width / 2 - 230;
+    var balanceHeight = stage.height - 35;
+    var balanceScore = new BasicText('Balance: ' + balance, textStyles, stage, true, balanceWidth, balanceHeight);
+
+    var barWidth = stage.width / 2 + 80;
+    var barHeight = stage.height - 35;
+    var betScore = new BasicText('Bet: ' + bet, textStyles, stage, true, barWidth, barHeight);
+
+    var winWidth = stage.width / 2 + 230;
+    var winHeight = stage.height - 35;
+    var winScore = new BasicText('Win: ' + win, textStyles, stage, true, winWidth, winHeight);
+
+    var startingAngle = config.startingAngle;
 
     // configure wheel
-    utils.shuffle(WHEEL).forEach(function (item, i) {
+    utils.shuffle(config.wheelElements).forEach(function (item, i) {
         var coordinates = utils.getCoordinateByAngle(externalCircle.height / 2 - 40, startingAngle)
         var innerText = new BasicText(item, {}, externalCircle, true, coordinates[0], coordinates[1]);
-        innerText.rotation = -(0.2 + 0.53 * i);
+        var defaultShift = 0.2;
+        var shiftRadian = 0.53;
+        innerText.rotation = -(defaultShift + shiftRadian * i);
         wheelMeta[startingAngle] = item;
-        startingAngle += 30;
+        startingAngle += config.elementDistance;
     });
-
     // configure bet buttons
-    betButtons.forEach(function (buttonScore, i) {
+    config.bets.forEach(function (buttonScore, i) {
         var handleButtonClick = function () {
-            rect.children.forEach(function (button) {
-                button.interactive = false;
+            stage.children.forEach(function (el) {
+                el.interactive = false;
             })
             var wheelKeys = Object.keys(wheelMeta);
             var rotation = wheelKeys[utils.getRandomIndex(wheelKeys)];
@@ -111,15 +112,15 @@ loader.load(function (loader, resources) {
             var isWin = wheelMeta[rotation] === bet
             balanceScore.updateInnerText('Balance: ' + balance);
             betScore.updateInnerText('Bet: ' + bet);
-            rotationRatio += 2880;
-            TweenMax.to(externalCircle, 5, {
+            rotationRatio += 360 * config.rollsBeforeStop;
+            TweenMax.to(externalCircle, config.animationDuration, {
                 pixi: {rotation: (rotationRatio + +rotation) + '_ccw'},
                 onComplete: function () {
                     balance < 5 && setTimeout(function () {
                         stage.addChild(finishScreen);
                     }, 500)
-                    rect.children.forEach(function (button) {
-                        button.interactive = true;
+                    stage.children.forEach(function (el) {
+                        el.interactive = true;
                     })
                     if (!isWin) return;
                     win += bet * utils.getWinRatio(bet);
@@ -127,10 +128,20 @@ loader.load(function (loader, resources) {
                 }
             });
         }
+
+        var buttonText = {
+            text: buttonScore,
+            styles: {
+                fill: '#ffffff',
+                strokeThickness: 1,
+                fontWeight: "bold"
+            }
+        }
+
         new Button(
             resources.yellowCircle.texture,
-            buttonScore,
-            rect,
+            buttonText,
+            stage,
             stage.width / 2 + ((i - 1) * 100),
             stage.height - 100,
             handleButtonClick
