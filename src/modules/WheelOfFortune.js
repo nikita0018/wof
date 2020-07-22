@@ -24,6 +24,22 @@ function initGameContainer() {
     return app;
 }
 
+function initAppStorage(loader, config) {
+    loader.app = {
+        spriteStorage: {},
+        config: config,
+        stage: new PIXI.Container(),
+        vars: {
+            balance: config.balance,
+            bet: config.bet,
+            win: config.win,
+            rotationRatio: config.rotationRatio,
+            wheelMeta: config.wheelMeta,
+            startingAngle: config.startingAngle
+        }
+    };
+}
+
 function bindAssets(loader) {
     loader
         .add('bg', 'assets/background.jpg')
@@ -108,20 +124,33 @@ function initWheelNumbers(loader) {
     });
 }
 
-function initAppStorage(loader, config) {
-    loader.app = {
-        spriteStorage: {},
-        config: config,
-        stage: new PIXI.Container(),
-        vars: {
-            balance: config.balance,
-            bet: config.bet,
-            win: config.win,
-            rotationRatio: config.rotationRatio,
-            wheelMeta: config.wheelMeta,
-            startingAngle: config.startingAngle
-        }
-    };
+function initBetButton(loader, resources, buttonScore, iterator) {
+    var handleButtonClick = function () {
+        betButtonHandler(loader, buttonScore)
+    }
+    var buttonText = {
+        text: buttonScore,
+        styles: styles.betButton
+    }
+
+    var width = loader.app.stage.width / 2 + ((iterator - 1) * 100);
+    var height = loader.app.stage.height - 100;
+
+    new Button(
+        resources.yellowCircle.texture,
+        buttonText,
+        loader.app.stage,
+        width,
+        height,
+        handleButtonClick
+    );
+
+}
+
+function initBetButtons(loader, resources) {
+    loader.app.config.bets.forEach(function (buttonScore, i) {
+        initBetButton(loader, resources, buttonScore, i);
+    });
 }
 
 function resetScores(loader) {
@@ -155,35 +184,6 @@ function betButtonHandler(loader, buttonScore) {
             loader.app.vars.win += loader.app.vars.bet * utils.getWinRatio(loader.app.vars.bet);
             loader.app.spriteStorage.winScore.updateInnerText('Win: ' + loader.app.vars.win);
         }
-    });
-}
-
-function initBetButton(loader, resources, buttonScore, iterator) {
-    var handleButtonClick = function () {
-        betButtonHandler(loader, buttonScore)
-    }
-    var buttonText = {
-        text: buttonScore,
-        styles: styles.betButton
-    }
-
-    var width = loader.app.stage.width / 2 + ((iterator - 1) * 100);
-    var height = loader.app.stage.height - 100;
-
-    new Button(
-        resources.yellowCircle.texture,
-        buttonText,
-        loader.app.stage,
-        width,
-        height,
-        handleButtonClick
-    );
-
-}
-
-function initBetButtons(loader, resources) {
-    loader.app.config.bets.forEach(function (buttonScore, i) {
-        initBetButton(loader, resources, buttonScore, i);
     });
 }
 
