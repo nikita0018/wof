@@ -1,4 +1,6 @@
-# Amazing Wheel Of Fortune 🎡
+# Amazing Wheel Of Fortune 🎰
+[(Wheel Of Fortune 🎰) on Github Pages](https://tvetcov.github.io/wof/)  
+
 Wheel of Fortune game. Rules are simple, you place a bet, if your bet equals to number on the wheel, your score increases, otherwise you loose this amount of points. Game developed with **[Pixi.JS](https://www.pixijs.com/)**.
 
 #### Main screen looks like:
