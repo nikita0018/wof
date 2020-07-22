@@ -9,14 +9,8 @@ module.exports = {
     target: 'web',
     output: {
         filename: 'main.js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, 'docs')
     },
-    devServer: {
-        contentBase: './dist',
-        compress: true,
-        port: 8080
-    },
-    devtool: 'inline-source-map',
     plugins: [
         new CopyWebpackPlugin({
             patterns: [{
