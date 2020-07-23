@@ -1,7 +1,8 @@
 var path = require('path');
-var CopyWebpackPlugin = require('copy-webpack-plugin')
-var HTMLWebpackPlugin = require('html-webpack-plugin')
-var FaviconsWebpackPlugin = require('favicons-webpack-plugin')
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+var SourceMapDevToolPlugin = require('webpack').SourceMapDevToolPlugin;
+var HTMLWebpackPlugin = require('html-webpack-plugin');
+var FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -23,6 +24,16 @@ module.exports = {
             template: './src/index.html',
             filename: 'index.html'
         }),
-        new FaviconsWebpackPlugin('./src/assets/favicon/favicon.ico')
-    ]
+        new FaviconsWebpackPlugin('./src/assets/favicon/favicon.ico'),
+        new SourceMapDevToolPlugin({
+            filename: '[file].map'
+        })
+    ],
+    module: {
+        rules: [{
+            test: /\.js$/,
+            enforce: 'pre',
+            use: ['source-map-loader']
+        }]
+    }
 };
