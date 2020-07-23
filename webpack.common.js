@@ -24,7 +24,7 @@ module.exports = {
             template: './src/index.html',
             filename: 'index.html'
         }),
-        new FaviconsWebpackPlugin('./src/assets/favicon/favicon.ico'),
+        new FaviconsWebpackPlugin('./src/assets/favicon.ico'),
         new SourceMapDevToolPlugin({
             filename: '[file].map'
         })
