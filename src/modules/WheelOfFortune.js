@@ -104,6 +104,7 @@ function initFinishScreen(loader) {
             loader.app.spriteStorage.betScore.updateInnerText('Bet: ' + loader.app.config.bet);
             loader.app.spriteStorage.winScore.updateInnerText('Win: ' + loader.app.config.win);
             loader.app.stage.removeChild(loader.app.spriteStorage.finishScreen);
+            setInteractivity(loader, true);
             resetScores(loader);
         }
     };
@@ -178,9 +179,13 @@ function rotateWheel(loader) {
         pixi: {rotation: (loader.app.vars.rotationRatio + +rotation) + '_ccw'},
         onComplete: function () {
             var isWin = loader.app.vars.wheelMeta[rotation] === loader.app.vars.bet;
-            loader.app.vars.balance < 5 && setTimeout(function () {
-                loader.app.stage.addChild(loader.app.spriteStorage.finishScreen);
-            }, 500)
+            if (loader.app.vars.balance < 5) {
+                setInteractivity(loader, false);
+                setTimeout(function () {
+                    loader.app.stage.addChild(loader.app.spriteStorage.finishScreen);
+                }, loader.app.config.finishScreenDelay);
+                return;
+            }
             setInteractivity(loader, true);
             if (!isWin) return;
             loader.app.vars.win += loader.app.vars.bet * utils.getWinRatio(loader.app.vars.bet);
@@ -191,6 +196,7 @@ function rotateWheel(loader) {
 
 function setInteractivity(loader, interactive) {
     loader.app.stage.children.forEach(function (el) {
+        el.makeTint && el.makeTint(interactive)
         el.interactive = interactive;
     })
 }

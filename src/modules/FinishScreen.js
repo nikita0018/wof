@@ -21,7 +21,7 @@ var styles = {
  */
 function FinishScreen(width, height, actionButton) {
     BasicGraphics.call(this, false, 0x00000, 0, 0, width, height);
-    new BasicText('You have no balance left!', messageStyles, this, true, width / 2, height / 2);
+    new BasicText('You have balance less than 5!', messageStyles, this, true, width / 2, height / 2);
     new TextButton(actionButton.message, styles, this, width / 2, height / 2 + 50, actionButton.onClick);
 }
 

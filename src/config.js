@@ -9,6 +9,7 @@ module.exports = {
     rollsBeforeStop: 8,
     animationDuration: 3,
     betButtonsScale: 0.95,
+    finishScreenDelay: 500,
     wheelElements: [1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 5, 5],
     bets: [1, 3, 5]
 }

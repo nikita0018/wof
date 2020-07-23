@@ -21,6 +21,9 @@ function Button(texture, innerText, appendTO, x, y, scale, onCLick) {
     this.scale.set(scale);
     this.on('pointerdown', onCLick);
     text.anchor.set(0.5);
+    this.makeTint = function (shouldApplyTint) {
+        this.tint = shouldApplyTint ? 0xffffff : 0x686868;
+    }
     this.addChild(text);
     appendTO.addChild(this);
 }

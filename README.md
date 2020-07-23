@@ -4,7 +4,7 @@
 Wheel of Fortune game. Rules are simple, you place a bet, if your bet equals to number on the wheel, your score increases, otherwise you loose this amount of points. Game developed with **[Pixi.JS](https://www.pixijs.com/)**.
 
 #### Main screen looks like:
-![Game screenshot](https://i.ibb.co/VYYHb8f/WOF.png "Game screenshot")
+![Game screenshot](https://iili.io/dzGt5b.png "Game screenshot")
 
 ## Running the project
 
