@@ -10,7 +10,7 @@ var BasicGraphics = require('./BasicGraphics');
  */
 function Scene(appendTO, texture) {
     BasicSprite.call(this, texture, appendTO);
-    var rect = new BasicGraphics(this, 0x00000, 0, this.height - 100, this.width, 100);
+    var rect = new BasicGraphics(this, 0x00000, 0, this.height - 90, this.width, 90);
     rect.alpha = 0.65;
 }
 

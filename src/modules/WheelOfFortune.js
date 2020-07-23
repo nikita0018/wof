@@ -125,16 +125,18 @@ function initWheelNumbers(loader) {
 }
 
 function initBetButton(loader, resources, buttonScore, iterator) {
-    var handleButtonClick = function () {
-        betButtonHandler(loader, buttonScore)
-    }
+    var width = loader.app.stage.width / 2 + ((iterator - 1) * 100);
+    var height = loader.app.stage.height - 90;
+    var scale = loader.app.config.betButtonsScale;
+
     var buttonText = {
         text: buttonScore,
         styles: styles.betButton
     }
 
-    var width = loader.app.stage.width / 2 + ((iterator - 1) * 100);
-    var height = loader.app.stage.height - 100;
+    var handleButtonClick = function () {
+        betButtonHandler(loader, buttonScore)
+    }
 
     new Button(
         resources.yellowCircle.texture,
@@ -142,9 +144,9 @@ function initBetButton(loader, resources, buttonScore, iterator) {
         loader.app.stage,
         width,
         height,
+        scale,
         handleButtonClick
     );
-
 }
 
 function initBetButtons(loader, resources) {
@@ -160,31 +162,37 @@ function resetScores(loader) {
 }
 
 function betButtonHandler(loader, buttonScore) {
-    loader.app.stage.children.forEach(function (el) {
-        el.interactive = false;
-    })
-    var wheelKeys = Object.keys(loader.app.vars.wheelMeta);
-    var rotation = wheelKeys[utils.getRandomIndex(wheelKeys)];
+    setInteractivity(loader, false);
     loader.app.vars.balance -= buttonScore;
     loader.app.vars.bet = buttonScore;
-    var isWin = loader.app.vars.wheelMeta[rotation] === loader.app.vars.bet;
     loader.app.spriteStorage.balanceScore.updateInnerText('Balance: ' + loader.app.vars.balance);
     loader.app.spriteStorage.betScore.updateInnerText('Bet: ' + loader.app.vars.bet);
     loader.app.vars.rotationRatio += 360 * loader.app.config.rollsBeforeStop;
+    rotateWheel(loader);
+}
+
+function rotateWheel(loader) {
+    var wheelKeys = Object.keys(loader.app.vars.wheelMeta);
+    var rotation = wheelKeys[utils.getRandomIndex(wheelKeys)];
     TweenMax.to(loader.app.spriteStorage.externalCircle, loader.app.config.animationDuration, {
         pixi: {rotation: (loader.app.vars.rotationRatio + +rotation) + '_ccw'},
         onComplete: function () {
+            var isWin = loader.app.vars.wheelMeta[rotation] === loader.app.vars.bet;
             loader.app.vars.balance < 5 && setTimeout(function () {
                 loader.app.stage.addChild(loader.app.spriteStorage.finishScreen);
             }, 500)
-            loader.app.stage.children.forEach(function (el) {
-                el.interactive = true;
-            })
+            setInteractivity(loader, true);
             if (!isWin) return;
             loader.app.vars.win += loader.app.vars.bet * utils.getWinRatio(loader.app.vars.bet);
             loader.app.spriteStorage.winScore.updateInnerText('Win: ' + loader.app.vars.win);
         }
     });
+}
+
+function setInteractivity(loader, interactive) {
+    loader.app.stage.children.forEach(function (el) {
+        el.interactive = interactive;
+    })
 }
 
 function WheelOfFortune(config) {
